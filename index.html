@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="data/AcademicCitySite_1.js"></script>
+        <script src="data/WholesaleandDistributionPoints_2.js"></script>
+        <script src="data/ConstructionandUtilitiesPoints_3.js"></script>
+        <script src="data/FoodZonesBuffer_4.js"></script>
+        <script src="data/FoodZonesDensity_5.js"></script>
+        <script src="data/FoodRelatedBusinessesPoints_6.js"></script>
+        <script src="data/RetailZonesBuffer_7.js"></script>
+        <script src="data/RetailZonesDensity_8.js"></script>
+        <script src="data/RetailandPersonalServicesPoints_9.js"></script>
+        <script src="data/ProfessionalandOfficeZonesBuffer_10.js"></script>
+        <script src="data/ProfessionalandOfficeZonesDensity_11.js"></script>
+        <script src="data/ProfessionalandOfficeBasedServicesPoints_12.js"></script>
+        <script src="data/NonProfitandNGOsZonesBuffer_13.js"></script>
+        <script src="data/NonProfitandNGOsZonesDensity_14.js"></script>
+        <script src="data/NonProfitandNGOsPoints_15.js"></script>
+        <script src="data/FinanceandInsuranceZonesBuffer_16.js"></script>
+        <script src="data/FinanceandInsuranceZonesDensity_17.js"></script>
+        <script src="data/FinanceandInsurancePoints_18.js"></script>
+        <script src="data/ArtsCultureandCreativeZonesBuffer_19.js"></script>
+        <script src="data/ArtsCultureandCreativeZonesDensity_20.js"></script>
+        <script src="data/ArtsCultureandCreativePoints_21.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[40.16315591766708,44.39853347649162],[40.234632316019336,44.53367168344105]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+	// Apply grayscale and opacity to OSM tiles
+	layer_OSMStandard_0.on('tileload', function(e) {
+   		e.tile.style.filter = 'grayscale(80%)';
+   		e.tile.style.opacity = '0.6';
+	});
+        function pop_AcademicCitySite_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['fid'] !== null ? autolinker.link(String(feature.properties['fid']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(String(feature.properties['id']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_AcademicCitySite_1_0() {
+            return {
+                pane: 'pane_AcademicCitySite_1',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(226,146,166,0.8)',
+                interactive: false,
+            }
+        }
+        var pattern_AcademicCitySite_1_1 = new L.StripePattern({
+            weight: 0.2,
+            spaceWeight: 1.2,
+            color: '#e292a6',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_AcademicCitySite_1_1.addTo(map);
+        function style_AcademicCitySite_1_1() {
+            return {
+                pane: 'pane_AcademicCitySite_1',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_AcademicCitySite_1_1,
+                interactive: false,
+            }
+        }
+        function style_AcademicCitySite_1_2() {
+            return {
+                pane: 'pane_AcademicCitySite_1',
+                opacity: 1,
+                color: 'rgba(226,146,166,0.8)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 1.0,
+                fillOpacity: 0,
+                interactive: false,
+            }
+        }
+        map.createPane('pane_AcademicCitySite_1');
+        map.getPane('pane_AcademicCitySite_1').style.zIndex = 401;
+        map.getPane('pane_AcademicCitySite_1').style['mix-blend-mode'] = 'normal';
+        var layer_AcademicCitySite_1 = new L.geoJson.multiStyle(json_AcademicCitySite_1, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_AcademicCitySite_1',
+            layerName: 'layer_AcademicCitySite_1',
+            pane: 'pane_AcademicCitySite_1',
+            onEachFeature: pop_AcademicCitySite_1,
+            styles: [style_AcademicCitySite_1_0,style_AcademicCitySite_1_1,style_AcademicCitySite_1_2,]
+        });
+        bounds_group.addLayer(layer_AcademicCitySite_1);
+        map.addLayer(layer_AcademicCitySite_1);
+        function pop_WholesaleandDistributionPoints_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_WholesaleandDistributionPoints_2_0() {
+            return {
+                pane: 'pane_WholesaleandDistributionPoints_2',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(210,123,95,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_WholesaleandDistributionPoints_2');
+        map.getPane('pane_WholesaleandDistributionPoints_2').style.zIndex = 402;
+        map.getPane('pane_WholesaleandDistributionPoints_2').style['mix-blend-mode'] = 'multiply';
+        var layer_WholesaleandDistributionPoints_2 = new L.geoJson(json_WholesaleandDistributionPoints_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_WholesaleandDistributionPoints_2',
+            layerName: 'layer_WholesaleandDistributionPoints_2',
+            pane: 'pane_WholesaleandDistributionPoints_2',
+            onEachFeature: pop_WholesaleandDistributionPoints_2,
+            style: style_WholesaleandDistributionPoints_2_0,
+        });
+        bounds_group.addLayer(layer_WholesaleandDistributionPoints_2);
+        // map.addLayer(layer_WholesaleandDistributionPoints_2);
+        function pop_ConstructionandUtilitiesPoints_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ConstructionandUtilitiesPoints_3_0() {
+            return {
+                pane: 'pane_ConstructionandUtilitiesPoints_3',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(91,99,84,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ConstructionandUtilitiesPoints_3');
+        map.getPane('pane_ConstructionandUtilitiesPoints_3').style.zIndex = 403;
+        map.getPane('pane_ConstructionandUtilitiesPoints_3').style['mix-blend-mode'] = 'multiply';
+        var layer_ConstructionandUtilitiesPoints_3 = new L.geoJson(json_ConstructionandUtilitiesPoints_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ConstructionandUtilitiesPoints_3',
+            layerName: 'layer_ConstructionandUtilitiesPoints_3',
+            pane: 'pane_ConstructionandUtilitiesPoints_3',
+            onEachFeature: pop_ConstructionandUtilitiesPoints_3,
+            style: style_ConstructionandUtilitiesPoints_3_0,
+        });
+        bounds_group.addLayer(layer_ConstructionandUtilitiesPoints_3);
+        // map.addLayer(layer_ConstructionandUtilitiesPoints_3);
+        function pop_FoodZonesBuffer_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FoodZonesBuffer_4_0() {
+            return {
+                pane: 'pane_FoodZonesBuffer_4',
+                opacity: 1,
+                color: 'rgba(0,62,60,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(146,204,113,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_FoodZonesBuffer_4');
+        map.getPane('pane_FoodZonesBuffer_4').style.zIndex = 404;
+        map.getPane('pane_FoodZonesBuffer_4').style['mix-blend-mode'] = 'multiply';
+        var layer_FoodZonesBuffer_4 = new L.geoJson(json_FoodZonesBuffer_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FoodZonesBuffer_4',
+            layerName: 'layer_FoodZonesBuffer_4',
+            pane: 'pane_FoodZonesBuffer_4',
+            onEachFeature: pop_FoodZonesBuffer_4,
+            style: style_FoodZonesBuffer_4_0,
+        });
+        bounds_group.addLayer(layer_FoodZonesBuffer_4);
+        map.addLayer(layer_FoodZonesBuffer_4);
+        function pop_FoodZonesDensity_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FoodZonesDensity_5_0(feature) {
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 9.000000 ) {
+                return {
+                pane: 'pane_FoodZonesDensity_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(197,216,181,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 9.000000 && feature.properties['CLUSTER_SIZE'] <= 26.000000 ) {
+                return {
+                pane: 'pane_FoodZonesDensity_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(177,220,141,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 26.000000 && feature.properties['CLUSTER_SIZE'] <= 54.000000 ) {
+                return {
+                pane: 'pane_FoodZonesDensity_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(158,223,101,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 54.000000 && feature.properties['CLUSTER_SIZE'] <= 1199.000000 ) {
+                return {
+                pane: 'pane_FoodZonesDensity_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(132,221,28,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 1199.000000 && feature.properties['CLUSTER_SIZE'] <= 2770.000000 ) {
+                return {
+                pane: 'pane_FoodZonesDensity_5',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(55,100,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_FoodZonesDensity_5');
+        map.getPane('pane_FoodZonesDensity_5').style.zIndex = 405;
+        map.getPane('pane_FoodZonesDensity_5').style['mix-blend-mode'] = 'multiply';
+        var layer_FoodZonesDensity_5 = new L.geoJson(json_FoodZonesDensity_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FoodZonesDensity_5',
+            layerName: 'layer_FoodZonesDensity_5',
+            pane: 'pane_FoodZonesDensity_5',
+            onEachFeature: pop_FoodZonesDensity_5,
+            style: style_FoodZonesDensity_5_0,
+        });
+        bounds_group.addLayer(layer_FoodZonesDensity_5);
+        // map.addLayer(layer_FoodZonesDensity_5);
+        function pop_FoodRelatedBusinessesPoints_6(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FoodRelatedBusinessesPoints_6_0() {
+            return {
+                pane: 'pane_FoodRelatedBusinessesPoints_6',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(133,182,111,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_FoodRelatedBusinessesPoints_6');
+        map.getPane('pane_FoodRelatedBusinessesPoints_6').style.zIndex = 406;
+        map.getPane('pane_FoodRelatedBusinessesPoints_6').style['mix-blend-mode'] = 'multiply';
+        var layer_FoodRelatedBusinessesPoints_6 = new L.geoJson(json_FoodRelatedBusinessesPoints_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FoodRelatedBusinessesPoints_6',
+            layerName: 'layer_FoodRelatedBusinessesPoints_6',
+            pane: 'pane_FoodRelatedBusinessesPoints_6',
+            onEachFeature: pop_FoodRelatedBusinessesPoints_6,
+            style: style_FoodRelatedBusinessesPoints_6_0,
+        });
+        bounds_group.addLayer(layer_FoodRelatedBusinessesPoints_6);
+        // map.addLayer(layer_FoodRelatedBusinessesPoints_6);
+        function pop_RetailZonesBuffer_7(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_RetailZonesBuffer_7_0() {
+            return {
+                pane: 'pane_RetailZonesBuffer_7',
+                opacity: 1,
+                color: 'rgba(147,2,2,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,182,54,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_RetailZonesBuffer_7');
+        map.getPane('pane_RetailZonesBuffer_7').style.zIndex = 407;
+        map.getPane('pane_RetailZonesBuffer_7').style['mix-blend-mode'] = 'multiply';
+        var layer_RetailZonesBuffer_7 = new L.geoJson(json_RetailZonesBuffer_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RetailZonesBuffer_7',
+            layerName: 'layer_RetailZonesBuffer_7',
+            pane: 'pane_RetailZonesBuffer_7',
+            onEachFeature: pop_RetailZonesBuffer_7,
+            style: style_RetailZonesBuffer_7_0,
+        });
+        bounds_group.addLayer(layer_RetailZonesBuffer_7);
+        map.addLayer(layer_RetailZonesBuffer_7);
+        function pop_RetailZonesDensity_8(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_RetailZonesDensity_8_0(feature) {
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 13.000000 ) {
+                return {
+                pane: 'pane_RetailZonesDensity_8',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,204,181,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 13.000000 && feature.properties['CLUSTER_SIZE'] <= 44.000000 ) {
+                return {
+                pane: 'pane_RetailZonesDensity_8',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,199,141,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 44.000000 && feature.properties['CLUSTER_SIZE'] <= 100.000000 ) {
+                return {
+                pane: 'pane_RetailZonesDensity_8',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,195,101,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 100.000000 && feature.properties['CLUSTER_SIZE'] <= 1034.000000 ) {
+                return {
+                pane: 'pane_RetailZonesDensity_8',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,167,28,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 1034.000000 && feature.properties['CLUSTER_SIZE'] <= 1314.000000 ) {
+                return {
+                pane: 'pane_RetailZonesDensity_8',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,91,0,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_RetailZonesDensity_8');
+        map.getPane('pane_RetailZonesDensity_8').style.zIndex = 408;
+        map.getPane('pane_RetailZonesDensity_8').style['mix-blend-mode'] = 'multiply';
+        var layer_RetailZonesDensity_8 = new L.geoJson(json_RetailZonesDensity_8, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RetailZonesDensity_8',
+            layerName: 'layer_RetailZonesDensity_8',
+            pane: 'pane_RetailZonesDensity_8',
+            onEachFeature: pop_RetailZonesDensity_8,
+            style: style_RetailZonesDensity_8_0,
+        });
+        bounds_group.addLayer(layer_RetailZonesDensity_8);
+        // map.addLayer(layer_RetailZonesDensity_8);
+        function pop_RetailandPersonalServicesPoints_9(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_RetailandPersonalServicesPoints_9_0() {
+            return {
+                pane: 'pane_RetailandPersonalServicesPoints_9',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,182,54,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_RetailandPersonalServicesPoints_9');
+        map.getPane('pane_RetailandPersonalServicesPoints_9').style.zIndex = 409;
+        map.getPane('pane_RetailandPersonalServicesPoints_9').style['mix-blend-mode'] = 'multiply';
+        var layer_RetailandPersonalServicesPoints_9 = new L.geoJson(json_RetailandPersonalServicesPoints_9, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_RetailandPersonalServicesPoints_9',
+            layerName: 'layer_RetailandPersonalServicesPoints_9',
+            pane: 'pane_RetailandPersonalServicesPoints_9',
+            onEachFeature: pop_RetailandPersonalServicesPoints_9,
+            style: style_RetailandPersonalServicesPoints_9_0,
+        });
+        bounds_group.addLayer(layer_RetailandPersonalServicesPoints_9);
+        // map.addLayer(layer_RetailandPersonalServicesPoints_9);
+        function pop_ProfessionalandOfficeZonesBuffer_10(feature, layer) {
+            var popupContent = '<table>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ProfessionalandOfficeZonesBuffer_10_0() {
+            return {
+                pane: 'pane_ProfessionalandOfficeZonesBuffer_10',
+                opacity: 1,
+                color: 'rgba(13,2,147,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(54,177,229,1.0)',
+                interactive: false,
+            }
+        }
+        map.createPane('pane_ProfessionalandOfficeZonesBuffer_10');
+        map.getPane('pane_ProfessionalandOfficeZonesBuffer_10').style.zIndex = 410;
+        map.getPane('pane_ProfessionalandOfficeZonesBuffer_10').style['mix-blend-mode'] = 'multiply';
+        var layer_ProfessionalandOfficeZonesBuffer_10 = new L.geoJson(json_ProfessionalandOfficeZonesBuffer_10, {
+            attribution: '',
+            interactive: false,
+            dataVar: 'json_ProfessionalandOfficeZonesBuffer_10',
+            layerName: 'layer_ProfessionalandOfficeZonesBuffer_10',
+            pane: 'pane_ProfessionalandOfficeZonesBuffer_10',
+            onEachFeature: pop_ProfessionalandOfficeZonesBuffer_10,
+            style: style_ProfessionalandOfficeZonesBuffer_10_0,
+        });
+        bounds_group.addLayer(layer_ProfessionalandOfficeZonesBuffer_10);
+        map.addLayer(layer_ProfessionalandOfficeZonesBuffer_10);
+        function pop_ProfessionalandOfficeZonesDensity_11(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ProfessionalandOfficeZonesDensity_11_0(feature) {
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 5.000000 ) {
+                return {
+                pane: 'pane_ProfessionalandOfficeZonesDensity_11',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(198,242,255,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 5.000000 && feature.properties['CLUSTER_SIZE'] <= 9.000000 ) {
+                return {
+                pane: 'pane_ProfessionalandOfficeZonesDensity_11',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(150,215,239,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 9.000000 && feature.properties['CLUSTER_SIZE'] <= 15.000000 ) {
+                return {
+                pane: 'pane_ProfessionalandOfficeZonesDensity_11',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(101,188,223,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 15.000000 && feature.properties['CLUSTER_SIZE'] <= 412.000000 ) {
+                return {
+                pane: 'pane_ProfessionalandOfficeZonesDensity_11',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(51,163,188,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 412.000000 && feature.properties['CLUSTER_SIZE'] <= 558.000000 ) {
+                return {
+                pane: 'pane_ProfessionalandOfficeZonesDensity_11',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(0,138,152,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_ProfessionalandOfficeZonesDensity_11');
+        map.getPane('pane_ProfessionalandOfficeZonesDensity_11').style.zIndex = 411;
+        map.getPane('pane_ProfessionalandOfficeZonesDensity_11').style['mix-blend-mode'] = 'multiply';
+        var layer_ProfessionalandOfficeZonesDensity_11 = new L.geoJson(json_ProfessionalandOfficeZonesDensity_11, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ProfessionalandOfficeZonesDensity_11',
+            layerName: 'layer_ProfessionalandOfficeZonesDensity_11',
+            pane: 'pane_ProfessionalandOfficeZonesDensity_11',
+            onEachFeature: pop_ProfessionalandOfficeZonesDensity_11,
+            style: style_ProfessionalandOfficeZonesDensity_11_0,
+        });
+        bounds_group.addLayer(layer_ProfessionalandOfficeZonesDensity_11);
+        // map.addLayer(layer_ProfessionalandOfficeZonesDensity_11);
+        function pop_ProfessionalandOfficeBasedServicesPoints_12(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ProfessionalandOfficeBasedServicesPoints_12_0() {
+            return {
+                pane: 'pane_ProfessionalandOfficeBasedServicesPoints_12',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(46,151,199,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ProfessionalandOfficeBasedServicesPoints_12');
+        map.getPane('pane_ProfessionalandOfficeBasedServicesPoints_12').style.zIndex = 412;
+        map.getPane('pane_ProfessionalandOfficeBasedServicesPoints_12').style['mix-blend-mode'] = 'multiply';
+        var layer_ProfessionalandOfficeBasedServicesPoints_12 = new L.geoJson(json_ProfessionalandOfficeBasedServicesPoints_12, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ProfessionalandOfficeBasedServicesPoints_12',
+            layerName: 'layer_ProfessionalandOfficeBasedServicesPoints_12',
+            pane: 'pane_ProfessionalandOfficeBasedServicesPoints_12',
+            onEachFeature: pop_ProfessionalandOfficeBasedServicesPoints_12,
+            style: style_ProfessionalandOfficeBasedServicesPoints_12_0,
+        });
+        bounds_group.addLayer(layer_ProfessionalandOfficeBasedServicesPoints_12);
+        // map.addLayer(layer_ProfessionalandOfficeBasedServicesPoints_12);
+        function pop_NonProfitandNGOsZonesBuffer_13(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_NonProfitandNGOsZonesBuffer_13_0() {
+            return {
+                pane: 'pane_NonProfitandNGOsZonesBuffer_13',
+                opacity: 1,
+                color: 'rgba(51,0,96,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(217,82,222,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_NonProfitandNGOsZonesBuffer_13');
+        map.getPane('pane_NonProfitandNGOsZonesBuffer_13').style.zIndex = 413;
+        map.getPane('pane_NonProfitandNGOsZonesBuffer_13').style['mix-blend-mode'] = 'multiply';
+        var layer_NonProfitandNGOsZonesBuffer_13 = new L.geoJson(json_NonProfitandNGOsZonesBuffer_13, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_NonProfitandNGOsZonesBuffer_13',
+            layerName: 'layer_NonProfitandNGOsZonesBuffer_13',
+            pane: 'pane_NonProfitandNGOsZonesBuffer_13',
+            onEachFeature: pop_NonProfitandNGOsZonesBuffer_13,
+            style: style_NonProfitandNGOsZonesBuffer_13_0,
+        });
+        bounds_group.addLayer(layer_NonProfitandNGOsZonesBuffer_13);
+        // map.addLayer(layer_NonProfitandNGOsZonesBuffer_13);
+        function pop_NonProfitandNGOsZonesDensity_14(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_NonProfitandNGOsZonesDensity_14_0(feature) {
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 3.000000 ) {
+                return {
+                pane: 'pane_NonProfitandNGOsZonesDensity_14',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,181,216,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 20.000000 ) {
+                return {
+                pane: 'pane_NonProfitandNGOsZonesDensity_14',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,128,189,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 20.000000 && feature.properties['CLUSTER_SIZE'] <= 64.000000 ) {
+                return {
+                pane: 'pane_NonProfitandNGOsZonesDensity_14',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(222,52,138,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 64.000000 && feature.properties['CLUSTER_SIZE'] <= 3.000000 ) {
+                return {
+                pane: 'pane_NonProfitandNGOsZonesDensity_14',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,0,67,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_NonProfitandNGOsZonesDensity_14');
+        map.getPane('pane_NonProfitandNGOsZonesDensity_14').style.zIndex = 414;
+        map.getPane('pane_NonProfitandNGOsZonesDensity_14').style['mix-blend-mode'] = 'multiply';
+        var layer_NonProfitandNGOsZonesDensity_14 = new L.geoJson(json_NonProfitandNGOsZonesDensity_14, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_NonProfitandNGOsZonesDensity_14',
+            layerName: 'layer_NonProfitandNGOsZonesDensity_14',
+            pane: 'pane_NonProfitandNGOsZonesDensity_14',
+            onEachFeature: pop_NonProfitandNGOsZonesDensity_14,
+            style: style_NonProfitandNGOsZonesDensity_14_0,
+        });
+        bounds_group.addLayer(layer_NonProfitandNGOsZonesDensity_14);
+        // map.addLayer(layer_NonProfitandNGOsZonesDensity_14);
+        function pop_NonProfitandNGOsPoints_15(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_NonProfitandNGOsPoints_15_0() {
+            return {
+                pane: 'pane_NonProfitandNGOsPoints_15',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,78,182,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_NonProfitandNGOsPoints_15');
+        map.getPane('pane_NonProfitandNGOsPoints_15').style.zIndex = 415;
+        map.getPane('pane_NonProfitandNGOsPoints_15').style['mix-blend-mode'] = 'multiply';
+        var layer_NonProfitandNGOsPoints_15 = new L.geoJson(json_NonProfitandNGOsPoints_15, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_NonProfitandNGOsPoints_15',
+            layerName: 'layer_NonProfitandNGOsPoints_15',
+            pane: 'pane_NonProfitandNGOsPoints_15',
+            onEachFeature: pop_NonProfitandNGOsPoints_15,
+            style: style_NonProfitandNGOsPoints_15_0,
+        });
+        bounds_group.addLayer(layer_NonProfitandNGOsPoints_15);
+        // map.addLayer(layer_NonProfitandNGOsPoints_15);
+        function pop_FinanceandInsuranceZonesBuffer_16(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE" colspan="2"><strong>CLUSTER_SIZE</strong><br />' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FinanceandInsuranceZonesBuffer_16_0() {
+            return {
+                pane: 'pane_FinanceandInsuranceZonesBuffer_16',
+                opacity: 1,
+                color: 'rgba(147,58,2,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,133,54,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_FinanceandInsuranceZonesBuffer_16');
+        map.getPane('pane_FinanceandInsuranceZonesBuffer_16').style.zIndex = 416;
+        map.getPane('pane_FinanceandInsuranceZonesBuffer_16').style['mix-blend-mode'] = 'multiply';
+        var layer_FinanceandInsuranceZonesBuffer_16 = new L.geoJson(json_FinanceandInsuranceZonesBuffer_16, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FinanceandInsuranceZonesBuffer_16',
+            layerName: 'layer_FinanceandInsuranceZonesBuffer_16',
+            pane: 'pane_FinanceandInsuranceZonesBuffer_16',
+            onEachFeature: pop_FinanceandInsuranceZonesBuffer_16,
+            style: style_FinanceandInsuranceZonesBuffer_16_0,
+        });
+        bounds_group.addLayer(layer_FinanceandInsuranceZonesBuffer_16);
+        // map.addLayer(layer_FinanceandInsuranceZonesBuffer_16);
+        function pop_FinanceandInsuranceZonesDensity_17(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE" colspan="2"><strong>CLUSTER_SIZE</strong><br />' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FinanceandInsuranceZonesDensity_17_0(feature) {
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 3.000000 ) {
+                return {
+                pane: 'pane_FinanceandInsuranceZonesDensity_17',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(216,190,181,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 7.000000 ) {
+                return {
+                pane: 'pane_FinanceandInsuranceZonesDensity_17',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(220,169,141,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 7.000000 && feature.properties['CLUSTER_SIZE'] <= 19.000000 ) {
+                return {
+                pane: 'pane_FinanceandInsuranceZonesDensity_17',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(223,148,101,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 19.000000 && feature.properties['CLUSTER_SIZE'] <= 38.000000 ) {
+                return {
+                pane: 'pane_FinanceandInsuranceZonesDensity_17',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,66,28,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 38.000000 && feature.properties['CLUSTER_SIZE'] <= 138.000000 ) {
+                return {
+                pane: 'pane_FinanceandInsuranceZonesDensity_17',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,0,2,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_FinanceandInsuranceZonesDensity_17');
+        map.getPane('pane_FinanceandInsuranceZonesDensity_17').style.zIndex = 417;
+        map.getPane('pane_FinanceandInsuranceZonesDensity_17').style['mix-blend-mode'] = 'multiply';
+        var layer_FinanceandInsuranceZonesDensity_17 = new L.geoJson(json_FinanceandInsuranceZonesDensity_17, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FinanceandInsuranceZonesDensity_17',
+            layerName: 'layer_FinanceandInsuranceZonesDensity_17',
+            pane: 'pane_FinanceandInsuranceZonesDensity_17',
+            onEachFeature: pop_FinanceandInsuranceZonesDensity_17,
+            style: style_FinanceandInsuranceZonesDensity_17_0,
+        });
+        bounds_group.addLayer(layer_FinanceandInsuranceZonesDensity_17);
+        // map.addLayer(layer_FinanceandInsuranceZonesDensity_17);
+        function pop_FinanceandInsurancePoints_18(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_FinanceandInsurancePoints_18_0() {
+            return {
+                pane: 'pane_FinanceandInsurancePoints_18',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,139,61,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_FinanceandInsurancePoints_18');
+        map.getPane('pane_FinanceandInsurancePoints_18').style.zIndex = 418;
+        map.getPane('pane_FinanceandInsurancePoints_18').style['mix-blend-mode'] = 'multiply';
+        var layer_FinanceandInsurancePoints_18 = new L.geoJson(json_FinanceandInsurancePoints_18, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FinanceandInsurancePoints_18',
+            layerName: 'layer_FinanceandInsurancePoints_18',
+            pane: 'pane_FinanceandInsurancePoints_18',
+            onEachFeature: pop_FinanceandInsurancePoints_18,
+            style: style_FinanceandInsurancePoints_18_0,
+        });
+        bounds_group.addLayer(layer_FinanceandInsurancePoints_18);
+        // map.addLayer(layer_FinanceandInsurancePoints_18);
+        function pop_ArtsCultureandCreativeZonesBuffer_19(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_ID</th>\
+                        <td class="visible-with-data" id="CLUSTER_ID">' + (feature.properties['CLUSTER_ID'] !== null ? autolinker.link(String(feature.properties['CLUSTER_ID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ArtsCultureandCreativeZonesBuffer_19_0() {
+            return {
+                pane: 'pane_ArtsCultureandCreativeZonesBuffer_19',
+                opacity: 1,
+                color: 'rgba(18,82,25,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(192,201,255,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ArtsCultureandCreativeZonesBuffer_19');
+        map.getPane('pane_ArtsCultureandCreativeZonesBuffer_19').style.zIndex = 419;
+        map.getPane('pane_ArtsCultureandCreativeZonesBuffer_19').style['mix-blend-mode'] = 'multiply';
+        var layer_ArtsCultureandCreativeZonesBuffer_19 = new L.geoJson(json_ArtsCultureandCreativeZonesBuffer_19, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ArtsCultureandCreativeZonesBuffer_19',
+            layerName: 'layer_ArtsCultureandCreativeZonesBuffer_19',
+            pane: 'pane_ArtsCultureandCreativeZonesBuffer_19',
+            onEachFeature: pop_ArtsCultureandCreativeZonesBuffer_19,
+            style: style_ArtsCultureandCreativeZonesBuffer_19_0,
+        });
+        bounds_group.addLayer(layer_ArtsCultureandCreativeZonesBuffer_19);
+        // map.addLayer(layer_ArtsCultureandCreativeZonesBuffer_19);
+        function pop_ArtsCultureandCreativeZonesDensity_20(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">CLUSTER_ID</th>\
+                        <td class="visible-with-data" id="CLUSTER_ID">' + (feature.properties['CLUSTER_ID'] !== null ? autolinker.link(String(feature.properties['CLUSTER_ID']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">CLUSTER_SIZE</th>\
+                        <td class="visible-with-data" id="CLUSTER_SIZE">' + (feature.properties['CLUSTER_SIZE'] !== null ? autolinker.link(String(feature.properties['CLUSTER_SIZE']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ArtsCultureandCreativeZonesDensity_20_0(feature) {
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 3.000000 ) {
+                return {
+                pane: 'pane_ArtsCultureandCreativeZonesDensity_20',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(181,181,216,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 3.000000 ) {
+                return {
+                pane: 'pane_ArtsCultureandCreativeZonesDensity_20',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(156,159,198,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 3.000000 && feature.properties['CLUSTER_SIZE'] <= 6.000000 ) {
+                return {
+                pane: 'pane_ArtsCultureandCreativeZonesDensity_20',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(131,136,179,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 6.000000 && feature.properties['CLUSTER_SIZE'] <= 89.000000 ) {
+                return {
+                pane: 'pane_ArtsCultureandCreativeZonesDensity_20',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(103,107,157,1.0)',
+                interactive: true,
+            }
+            }
+            if (feature.properties['CLUSTER_SIZE'] >= 89.000000 && feature.properties['CLUSTER_SIZE'] <= 255.000000 ) {
+                return {
+                pane: 'pane_ArtsCultureandCreativeZonesDensity_20',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(75,78,134,1.0)',
+                interactive: true,
+            }
+            }
+        }
+        map.createPane('pane_ArtsCultureandCreativeZonesDensity_20');
+        map.getPane('pane_ArtsCultureandCreativeZonesDensity_20').style.zIndex = 420;
+        map.getPane('pane_ArtsCultureandCreativeZonesDensity_20').style['mix-blend-mode'] = 'multiply';
+        var layer_ArtsCultureandCreativeZonesDensity_20 = new L.geoJson(json_ArtsCultureandCreativeZonesDensity_20, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ArtsCultureandCreativeZonesDensity_20',
+            layerName: 'layer_ArtsCultureandCreativeZonesDensity_20',
+            pane: 'pane_ArtsCultureandCreativeZonesDensity_20',
+            onEachFeature: pop_ArtsCultureandCreativeZonesDensity_20,
+            style: style_ArtsCultureandCreativeZonesDensity_20_0,
+        });
+        bounds_group.addLayer(layer_ArtsCultureandCreativeZonesDensity_20);
+        // map.addLayer(layer_ArtsCultureandCreativeZonesDensity_20);
+        function pop_ArtsCultureandCreativePoints_21(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="name" colspan="2"><strong>name</strong><br />' + (feature.properties['name'] !== null ? autolinker.link(String(feature.properties['name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level1_category_name</th>\
+                        <td class="visible-with-data" id="level1_category_name">' + (feature.properties['level1_category_name'] !== null ? autolinker.link(String(feature.properties['level1_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level2_category_name</th>\
+                        <td class="visible-with-data" id="level2_category_name">' + (feature.properties['level2_category_name'] !== null ? autolinker.link(String(feature.properties['level2_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">level3_category_name</th>\
+                        <td class="visible-with-data" id="level3_category_name">' + (feature.properties['level3_category_name'] !== null ? autolinker.link(String(feature.properties['level3_category_name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division</th>\
+                        <td class="visible-with-data" id="NACE_Division">' + (feature.properties['NACE_Division'] !== null ? autolinker.link(String(feature.properties['NACE_Division']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section</th>\
+                        <td class="visible-with-data" id="NACE_Section">' + (feature.properties['NACE_Section'] !== null ? autolinker.link(String(feature.properties['NACE_Section']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Division_Title</th>\
+                        <td class="visible-with-data" id="NACE_Division_Title">' + (feature.properties['NACE_Division_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Division_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">NACE_Section_Title</th>\
+                        <td class="visible-with-data" id="NACE_Section_Title">' + (feature.properties['NACE_Section_Title'] !== null ? autolinker.link(String(feature.properties['NACE_Section_Title']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ArtsCultureandCreativePoints_21_0() {
+            return {
+                pane: 'pane_ArtsCultureandCreativePoints_21',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(127,91,232,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ArtsCultureandCreativePoints_21');
+        map.getPane('pane_ArtsCultureandCreativePoints_21').style.zIndex = 421;
+        map.getPane('pane_ArtsCultureandCreativePoints_21').style['mix-blend-mode'] = 'multiply';
+        var layer_ArtsCultureandCreativePoints_21 = new L.geoJson(json_ArtsCultureandCreativePoints_21, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ArtsCultureandCreativePoints_21',
+            layerName: 'layer_ArtsCultureandCreativePoints_21',
+            pane: 'pane_ArtsCultureandCreativePoints_21',
+            onEachFeature: pop_ArtsCultureandCreativePoints_21,
+            style: style_ArtsCultureandCreativePoints_21_0,
+        });
+        bounds_group.addLayer(layer_ArtsCultureandCreativePoints_21);
+        // map.addLayer(layer_ArtsCultureandCreativePoints_21);
+        var overlaysTree = [
+        {label: '<b>Arts Culture and Creative Activities</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/ArtsCultureandCreativePoints_21.png" /> Arts Culture and Creative - Points', layer: layer_ArtsCultureandCreativePoints_21},
+            {label: 'Arts Culture and Creative Zones - Density<br /><table><tr><td style="text-align: center;"><img src="legend/ArtsCultureandCreativeZonesDensity_20_330.png" /></td><td>3 - 3</td></tr><tr><td style="text-align: center;"><img src="legend/ArtsCultureandCreativeZonesDensity_20_331.png" /></td><td>3 - 3</td></tr><tr><td style="text-align: center;"><img src="legend/ArtsCultureandCreativeZonesDensity_20_362.png" /></td><td>3 - 6</td></tr><tr><td style="text-align: center;"><img src="legend/ArtsCultureandCreativeZonesDensity_20_6893.png" /></td><td>6 - 89</td></tr><tr><td style="text-align: center;"><img src="legend/ArtsCultureandCreativeZonesDensity_20_892554.png" /></td><td>89 - 255</td></tr></table>', layer: layer_ArtsCultureandCreativeZonesDensity_20},
+            {label: '<img src="legend/ArtsCultureandCreativeZonesBuffer_19.png" /> Arts Culture and Creative Zones - Buffer', layer: layer_ArtsCultureandCreativeZonesBuffer_19},]},
+        {label: '<b>Finance_and_Insurance</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/FinanceandInsurancePoints_18.png" /> Finance and Insurance - Points', layer: layer_FinanceandInsurancePoints_18},
+            {label: 'Finance and Insurance Zones - Density<br /><table><tr><td style="text-align: center;"><img src="legend/FinanceandInsuranceZonesDensity_17_330.png" /></td><td>3 - 3</td></tr><tr><td style="text-align: center;"><img src="legend/FinanceandInsuranceZonesDensity_17_371.png" /></td><td>3 - 7</td></tr><tr><td style="text-align: center;"><img src="legend/FinanceandInsuranceZonesDensity_17_7192.png" /></td><td>7 - 19</td></tr><tr><td style="text-align: center;"><img src="legend/FinanceandInsuranceZonesDensity_17_19383.png" /></td><td>19 - 38</td></tr><tr><td style="text-align: center;"><img src="legend/FinanceandInsuranceZonesDensity_17_381384.png" /></td><td>38 - 138</td></tr></table>', layer: layer_FinanceandInsuranceZonesDensity_17},
+            {label: '<img src="legend/FinanceandInsuranceZonesBuffer_16.png" /> Finance and Insurance Zones - Buffer', layer: layer_FinanceandInsuranceZonesBuffer_16},]},
+        {label: '<b>Non-Profit and NGOs</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/NonProfitandNGOsPoints_15.png" /> Non-Profit and NGOs - Points', layer: layer_NonProfitandNGOsPoints_15},
+            {label: 'Non-Profit and NGOs Zones - Density<br /><table><tr><td style="text-align: center;"><img src="legend/NonProfitandNGOsZonesDensity_14_330.png" /></td><td>3 - 3</td></tr><tr><td style="text-align: center;"><img src="legend/NonProfitandNGOsZonesDensity_14_3201.png" /></td><td>3 - 20</td></tr><tr><td style="text-align: center;"><img src="legend/NonProfitandNGOsZonesDensity_14_20642.png" /></td><td>20 - 64</td></tr><tr><td style="text-align: center;"><img src="legend/NonProfitandNGOsZonesDensity_14_6433.png" /></td><td>64 - 3</td></tr></table>', layer: layer_NonProfitandNGOsZonesDensity_14},
+            {label: '<img src="legend/NonProfitandNGOsZonesBuffer_13.png" /> Non-Profit and NGOs Zones - Buffer', layer: layer_NonProfitandNGOsZonesBuffer_13},]},
+        {label: '<b>Professional and Office-Based Services</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/ProfessionalandOfficeBasedServicesPoints_12.png" /> Professional and Office-Based Services - Points', layer: layer_ProfessionalandOfficeBasedServicesPoints_12},
+            {label: 'Professional and Office Zones - Density<br /><table><tr><td style="text-align: center;"><img src="legend/ProfessionalandOfficeZonesDensity_11_350.png" /></td><td>3 - 5</td></tr><tr><td style="text-align: center;"><img src="legend/ProfessionalandOfficeZonesDensity_11_591.png" /></td><td>5 - 9</td></tr><tr><td style="text-align: center;"><img src="legend/ProfessionalandOfficeZonesDensity_11_9152.png" /></td><td>9 - 15</td></tr><tr><td style="text-align: center;"><img src="legend/ProfessionalandOfficeZonesDensity_11_154123.png" /></td><td>15 - 412</td></tr><tr><td style="text-align: center;"><img src="legend/ProfessionalandOfficeZonesDensity_11_4125584.png" /></td><td>412 - 558</td></tr></table>', layer: layer_ProfessionalandOfficeZonesDensity_11},
+            {label: '<img src="legend/ProfessionalandOfficeZonesBuffer_10.png" /> Professional and Office Zones - Buffer', layer: layer_ProfessionalandOfficeZonesBuffer_10},]},
+        {label: '<b>Retail and Personal Services</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/RetailandPersonalServicesPoints_9.png" /> Retail and Personal Services - Points', layer: layer_RetailandPersonalServicesPoints_9},
+            {label: 'Retail Zones - Density<br /><table><tr><td style="text-align: center;"><img src="legend/RetailZonesDensity_8_3130.png" /></td><td>3 - 13</td></tr><tr><td style="text-align: center;"><img src="legend/RetailZonesDensity_8_13441.png" /></td><td>13 - 44</td></tr><tr><td style="text-align: center;"><img src="legend/RetailZonesDensity_8_441002.png" /></td><td>44 - 100</td></tr><tr><td style="text-align: center;"><img src="legend/RetailZonesDensity_8_10010343.png" /></td><td>100 - 1034</td></tr><tr><td style="text-align: center;"><img src="legend/RetailZonesDensity_8_103413144.png" /></td><td>1034 - 1314</td></tr></table>', layer: layer_RetailZonesDensity_8},
+            {label: '<img src="legend/RetailZonesBuffer_7.png" /> Retail Zones - Buffer', layer: layer_RetailZonesBuffer_7},]},
+        {label: '<b>Food-Related Businesses</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/FoodRelatedBusinessesPoints_6.png" /> Food Related Businesses - Points', layer: layer_FoodRelatedBusinessesPoints_6},
+            {label: 'Food Zones - Density<br /><table><tr><td style="text-align: center;"><img src="legend/FoodZonesDensity_5_390.png" /></td><td>3 - 9</td></tr><tr><td style="text-align: center;"><img src="legend/FoodZonesDensity_5_9261.png" /></td><td>9 - 26</td></tr><tr><td style="text-align: center;"><img src="legend/FoodZonesDensity_5_26542.png" /></td><td>26 - 54</td></tr><tr><td style="text-align: center;"><img src="legend/FoodZonesDensity_5_5411993.png" /></td><td>54 - 1199</td></tr><tr><td style="text-align: center;"><img src="legend/FoodZonesDensity_5_119927704.png" /></td><td>1199 - 2770</td></tr></table>', layer: layer_FoodZonesDensity_5},
+            {label: '<img src="legend/FoodZonesBuffer_4.png" /> Food Zones - Buffer', layer: layer_FoodZonesBuffer_4},]},
+        {label: '<b>Construction and Utilities</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/ConstructionandUtilitiesPoints_3.png" /> Construction and Utilities - Points', layer: layer_ConstructionandUtilitiesPoints_3},]},
+        {label: '<b>Wholesale and Distribution</b>', collapsed: true, selectAllCheckbox: true, children: [
+            {label: '<img src="legend/WholesaleandDistributionPoints_2.png" /> Wholesale and Distribution - Points', layer: layer_WholesaleandDistributionPoints_2},]},
+            {label: '<img src="legend/AcademicCitySite_1.png" /> Academic City Site', layer: layer_AcademicCitySite_1},
+            {label: "OSM Standard", layer: layer_OSMStandard_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        </script>
+    </body>
+</html>
